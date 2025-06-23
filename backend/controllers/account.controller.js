@@ -1,9 +1,18 @@
 import mongoose from "mongoose";
 import Account from "../Schemas/account.schema.js";
+import z from "zod";
+
+const transferBody = z.object({
+  to: z.string(),
+  amount: z.number(),
+})
 
 export const transferController = async (req, res) => {
+  const result = transferBody.safeParse(req.body);
+  if (!result.success) {
+    return res.status(400).json({ message: "Incorrect inputs" });
+  }
   const { to, amount } = req.body;
-
   const {_id : fromAccountId} = await Account.findOne({ userId: req.userId });
 
   if (!fromAccountId || !to || !amount) {
