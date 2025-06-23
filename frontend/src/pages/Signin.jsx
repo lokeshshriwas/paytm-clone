@@ -1,0 +1,105 @@
+import React, { useState } from 'react';
+import InputField from '../components/InputField';
+import Button from '../components/Button';
+import z from 'zod';
+import toast, { Toaster } from 'react-hot-toast';
+
+const formSchema = z.object({
+  firstName: z.string().trim().min(1).regex(/^[a-zA-Z\s'-]+$/, 'First name must contain only letters'),
+  lastName: z.string().trim().min(1).regex(/^[a-zA-Z\s'-]+$/, 'Last name must contain only letters'),
+  email: z.string().trim().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+const Signin = () => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+  });
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+  };
+
+  const isFormFilled = Object.values(formData).every((val) => val.trim() !== '');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const result = formSchema.safeParse(formData);
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        toast.error(issue.message);
+      });
+      return;
+    }
+
+    const safeData = result.data;
+    console.log('Form submitted:', safeData);
+    toast.success('Form submitted successfully!');
+  };
+
+  return (
+    <div className="w-screen h-screen flex items-center justify-center bg-gray-200">
+      <div className="mx-4 w-full h-fit sm:mx-0 sm:w-1/2 md:w-1/4 flex flex-col items-center justify-center bg-white p-4 rounded-lg">
+        <div className="mb-6 flex flex-col items-center justify-center">
+          <h1 className="text-2xl font-bold">Sign In</h1>
+          <p className="text-center text-md text-gray-600 mt-2 mx-4">
+            Enter your information to Sign in
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-2">
+          <InputField
+            type="text"
+            placeholder="First Name"
+            value={formData.firstName}
+            onChange={handleChange('firstName')}
+            label="First Name"
+            required
+          />
+          <InputField
+            type="text"
+            placeholder="Last Name"
+            value={formData.lastName}
+            onChange={handleChange('lastName')}
+            label="Last Name"
+            required
+          />
+          <InputField
+            type="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange('email')}
+            label="Email"
+            required
+          />
+          <InputField
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange('password')}
+            label="Password"
+            required
+          />
+
+          <Button
+            type="submit"
+            label="Sign In"
+            disabled={!isFormFilled}
+            className={!isFormFilled ? 'bg-gray-400 opacity-50 cursor-not-allowed' : ''}
+          />
+        </form>
+      </div>
+
+      <Toaster position="bottom-center" />
+    </div>
+  );
+};
+
+export default Signin;
