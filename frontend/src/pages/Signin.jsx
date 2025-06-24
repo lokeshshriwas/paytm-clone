@@ -3,18 +3,15 @@ import InputField from '../components/InputField';
 import Button from '../components/Button';
 import z from 'zod';
 import toast, { Toaster } from 'react-hot-toast';
+import {Link} from 'react-router-dom'
 
 const formSchema = z.object({
-  firstName: z.string().trim().min(1).regex(/^[a-zA-Z\s'-]+$/, 'First name must contain only letters'),
-  lastName: z.string().trim().min(1).regex(/^[a-zA-Z\s'-]+$/, 'Last name must contain only letters'),
   email: z.string().trim().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 const Signin = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
     email: '',
     password: '',
   });
@@ -56,22 +53,6 @@ const Signin = () => {
 
         <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-2">
           <InputField
-            type="text"
-            placeholder="First Name"
-            value={formData.firstName}
-            onChange={handleChange('firstName')}
-            label="First Name"
-            required
-          />
-          <InputField
-            type="text"
-            placeholder="Last Name"
-            value={formData.lastName}
-            onChange={handleChange('lastName')}
-            label="Last Name"
-            required
-          />
-          <InputField
             type="email"
             placeholder="Email"
             value={formData.email}
@@ -95,6 +76,7 @@ const Signin = () => {
             className={!isFormFilled ? 'bg-gray-400 opacity-50 cursor-not-allowed' : ''}
           />
         </form>
+        <div className='mt-2 text-gray-700'>Don't have an account <Link to='/signup' className='text-black underline'>Signup</Link></div>
       </div>
 
       <Toaster position="bottom-center" />
