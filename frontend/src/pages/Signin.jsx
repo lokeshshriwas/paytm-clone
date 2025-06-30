@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
-import InputField from '../components/InputField';
-import Button from '../components/Button';
-import z from 'zod';
-import toast, { Toaster } from 'react-hot-toast';
-import {Link} from 'react-router-dom'
+import React, { useState } from "react";
+import InputField from "../components/InputField";
+import Button from "../components/Button";
+import z from "zod";
+import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
+import { BASE_URL } from "../config/config.js";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
-  email: z.string().trim().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().trim().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const Signin = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (field) => (e) => {
     setFormData((prev) => ({
@@ -23,9 +28,11 @@ const Signin = () => {
     }));
   };
 
-  const isFormFilled = Object.values(formData).every((val) => val.trim() !== '');
+  const isFormFilled = Object.values(formData).every(
+    (val) => val.trim() !== ""
+  );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const result = formSchema.safeParse(formData);
@@ -35,10 +42,23 @@ const Signin = () => {
       });
       return;
     }
-
     const safeData = result.data;
-    console.log('Form submitted:', safeData);
-    toast.success('Form submitted successfully!');
+
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/api/v1/user/signin`,
+        safeData
+      );
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        localStorage.setItem('token', response.data.token);
+        navigate("/dashboard");
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
   };
 
   return (
@@ -51,12 +71,15 @@ const Signin = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-2">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full flex flex-col items-center gap-2"
+        >
           <InputField
             type="email"
             placeholder="Email"
             value={formData.email}
-            onChange={handleChange('email')}
+            onChange={handleChange("email")}
             label="Email"
             required
           />
@@ -64,7 +87,7 @@ const Signin = () => {
             type="password"
             placeholder="Password"
             value={formData.password}
-            onChange={handleChange('password')}
+            onChange={handleChange("password")}
             label="Password"
             required
           />
@@ -73,13 +96,18 @@ const Signin = () => {
             type="submit"
             label="Sign In"
             disabled={!isFormFilled}
-            className={!isFormFilled ? 'bg-gray-400 opacity-50 cursor-not-allowed' : ''}
+            className={
+              !isFormFilled ? "bg-gray-400 opacity-50 cursor-not-allowed" : ""
+            }
           />
         </form>
-        <div className='mt-2 text-gray-700'>Don't have an account <Link to='/signup' className='text-black underline'>Signup</Link></div>
+        <div className="mt-2 text-gray-700">
+          Don't have an account{" "}
+          <Link to="/signup" className="text-black underline">
+            Signup
+          </Link>
+        </div>
       </div>
-
-      <Toaster position="bottom-center" />
     </div>
   );
 };

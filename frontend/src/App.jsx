@@ -5,6 +5,7 @@ import Signup from './pages/Signup';
 import Signin from './pages/Signin';
 import Dashboard from './pages/Dashboard';
 import Sendmoney from './pages/Sendmoney';
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard/>} />
         <Route path="/sendMoney" element={<Sendmoney/>} />
       </Routes>
+      <Toaster position="bottom-center" />
     </div>
   );
 }
