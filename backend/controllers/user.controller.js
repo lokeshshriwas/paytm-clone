@@ -133,3 +133,23 @@ export const getSearchedUser = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const checkToken = (req, res) => {
+  const authHeaders = req.headers.authorization;
+  if (!authHeaders || !authHeaders.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  const token = authHeaders.split(" ")[1];
+  try {
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    if(decodedToken.userId){
+        req.userId = decodedToken.userId;
+        return res.status(200).json({message : "Token validated"})
+    }else {
+        return res.status(401).json({ message: "Invalid token" });
+    }
+  } catch (error) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+};
+
